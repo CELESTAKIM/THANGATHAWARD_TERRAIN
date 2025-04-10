@@ -1,0 +1,43 @@
+link: https://code.earthengine.google.com/ca5284a12ace13f78042c5117f522cb7
+
+get the folder with them||||
+
+code:
+
+
+
+
+
+
+// Load the Thangatha Ward asset
+var thangathaWard = ee.FeatureCollection('projects/ee-celestakim019/assets/thangatha_ward');
+
+// Load SRTM elevation dataset
+var srtm = ee.Image('USGS/SRTMGL1_003');
+
+// Clip the elevation data to the boundary of the ward
+var clippedElevation = srtm.clip(thangathaWard);
+
+// Calculate the minimum and maximum elevation
+var minElevation = clippedElevation.reduceRegion({
+  reducer: ee.Reducer.min(),
+  geometry: thangathaWard.geometry(),
+  scale: 30, // SRTM resolution is 30m
+  maxPixels: 1e9
+}).get('elevation');
+
+var maxElevation = clippedElevation.reduceRegion({
+  reducer: ee.Reducer.max(),
+  geometry: thangathaWard.geometry(),
+  scale: 30,
+  maxPixels: 1e9
+}).get('elevation');
+
+// Print the results to the console
+print('Minimum Elevation (meters):', minElevation);
+print('Maximum Elevation (meters):', maxElevation);
+
+// Visualize the elevation on the map
+Map.centerObject(thangathaWard, 12);
+Map.addLayer(clippedElevation, {min: 0, max: 3000, palette: ['blue', 'green', 'yellow', 'red']}, 'Elevation');
+Map.addLayer(thangathaWard, {}, 'Thangatha Ward Boundary');
